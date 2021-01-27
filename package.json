@@ -1,0 +1,13 @@
+{
+  "dependencies": {
+    "express": "^4.17.1",
+    "nodemon": "^2.0.7"
+  },
+  "engines": {
+    "node": "15.0.1",
+    "npm": "7.0.3"
+  },
+  "scripts": {
+    "dev": "nodemon"
+  }
+}
