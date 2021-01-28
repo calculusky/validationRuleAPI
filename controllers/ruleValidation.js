@@ -1,4 +1,5 @@
-const { validationFunc, throwError } = require("../utils/helper");
+const { throwError } = require("../utils/helper");
+const { validator } = require('./validator');
 
 
 exports.myInfo = (req, res, next) => {
@@ -20,7 +21,7 @@ exports.validateRule = async (req, res, next) => {
     //const { rule, data } = req.body;
     try {
         //validate fields and return error message if exists
-        validationFunc(req.body, throwError);
+        validator(req.body, throwError);
 
         //return success message
         res.json({ message: 'success'})
