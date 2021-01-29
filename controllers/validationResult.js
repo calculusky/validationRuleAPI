@@ -1,8 +1,8 @@
 
 //success message
-const successMessage = (fieldName, fieldValue, condition, conditionValue) => {
+const successMessage = (fieldName, fieldValue, condition, conditionValue, message) => {
     const result = {
-        message: `field ${fieldName} successfully validated`,
+        message: message,
         status: 'success',
         data: {
             validation: {
@@ -21,9 +21,9 @@ const successMessage = (fieldName, fieldValue, condition, conditionValue) => {
 }
 
 // failure message
-const failureMessage = (fieldName, fieldValue, condition, conditionValue) => {
+const failureMessage = (fieldName, fieldValue, condition, conditionValue, message) => {
     const result = {
-        message: `field ${fieldName} failed validation`,
+        message: message,
         status: 'error',
         data: {
             validation: {
@@ -43,19 +43,23 @@ const failureMessage = (fieldName, fieldValue, condition, conditionValue) => {
 
 
 exports.validationResult = ({ fieldName, fieldValue, condition, conditionValue }) => {
-    console.log(fieldName, fieldValue, condition, condition_value)
+    //console.log(fieldName, fieldValue, condition, conditionValue, '----------')
+    const successMsg = `field ${fieldName} successfully validated`;
+    const errorMsg = `field ${fieldName} failed validation`
+    //return successMessage(fieldName, fieldValue, condition, conditionValue);
+
     switch (condition) {
         case 'eq':
             if(fieldValue == conditionValue){
-              return successMessage(fieldName, fieldValue, condition, conditionValue);
+              return successMessage(fieldName, fieldValue, condition, conditionValue, successMsg);
             }
-            return failureMessage(fieldName, fieldValue, condition, conditionValue);
+            return failureMessage(fieldName, fieldValue, condition, conditionValue, errorMsg);
 
         case 'neq':
-            if(fieldValue == conditionValue){
-            return successMessage(fieldName, fieldValue, condition, conditionValue);
+            if(fieldValue !== conditionValue){
+              return successMessage(fieldName, fieldValue, condition, conditionValue, successMsg);
             }
-            return failureMessage(fieldName, fieldValue, condition, conditionValue)
+            return failureMessage(fieldName, fieldValue, condition, conditionValue, errorMsg)
     
         default:
             break;

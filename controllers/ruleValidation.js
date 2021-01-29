@@ -23,9 +23,6 @@ exports.validateRule = async (req, res, next) => {
         //validate fields and return error message if exists
         validator(req, res, throwError);
 
-        //return success message
-        res.json({ message: 'success'})
-
     } catch (error) {
         next(error)
     }

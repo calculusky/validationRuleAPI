@@ -121,7 +121,7 @@ exports.validator = (req, res, throwErr) => {
         const dataKeys = Object.keys(reqData.data);
         //for no nesting
         if(ruleFieldValue){
-            console.log(ruleFieldValue)
+            //console.log(ruleFieldValue)
             const isRuleFieldInData = dataKeys.includes(ruleFieldValue);
             if(!isRuleFieldInData){
                 return throwErr({
@@ -130,17 +130,18 @@ exports.validator = (req, res, throwErr) => {
                 })
             }
             //call validationResult fxn and send result 
-            // const { result, success } = validationResult({
-            //     fieldName: ruleFieldValue,
-            //     fieldValue: reqData.data.ruleFieldValue,
-            //     condition: reqData.rule.condition,
-            //     conditionValue: reqData.rule.condition_value
-            // })
-            console.log(reqData.data.ruleFieldValue, reqData.rule.condition, reqData.rule.condition_value)
-            // if(success){
-            //     return res.json(result);
-            // }
-            // return res.status(400).json(result);
+            const { result, success } = validationResult({
+                fieldName: ruleFieldValue,
+                fieldValue: reqData.data[ruleFieldValue],
+                condition: reqData.rule.condition,
+                conditionValue: reqData.rule.condition_value
+            })
+            //console.log(reqData.data[ruleFieldValue], reqData.rule.condition, reqData.rule.condition_value)
+            if(success){
+                return res.json(result);
+            }
+            return res.status(400).json(result);
+            //console.log(result)
         }
         //for nested
         if(ruleFieldValues){
