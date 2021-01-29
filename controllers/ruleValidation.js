@@ -18,6 +18,7 @@ exports.myInfo = (req, res, next) => {
 }
 
 exports.validateRule = async (req, res, next) => {
+   
     //const { rule, data } = req.body;
     try {
         //validate fields and return error message if exists

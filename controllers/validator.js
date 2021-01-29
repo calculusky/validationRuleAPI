@@ -1,4 +1,4 @@
-const { validationResult } = require('./validationResult');
+const { validationResult, validateArray } = require('./validationResult');
 
 
 
@@ -69,16 +69,14 @@ exports.validator = (req, res, throwErr) => {
         }
     }
     //check condition_value if it is a number
-    if(key === 'condition_value'){
-        if(isNaN(reqData.rule[key])){
-            return throwErr({
-                message: `${key} should be a number.`,
-                statusCode: 400
-            })
-        }
-    }
-
-
+    // if(key === 'condition_value'){
+    //     if(isNaN(reqData.rule[key])){
+    //         return throwErr({
+    //             message: `${key} should be a number.`,
+    //             statusCode: 400
+    //         })
+    //     }
+    // }
    })
   
    //check the field key of the rule object and get the value(s)
@@ -115,6 +113,7 @@ exports.validator = (req, res, throwErr) => {
         }) 
     }
     
+
     //check if the field specified in the rule object is passed in the data 
     //for object
     if(Object.prototype.toString.call(reqData.data) === '[object Object]'){
@@ -143,33 +142,126 @@ exports.validator = (req, res, throwErr) => {
             return res.status(400).json(result);
             //console.log(result)
         }
-        //for nested
+
+        //for nested field values
         if(ruleFieldValues){
-            //console.log(ruleFieldValues)
-            const isRuleFieldValueOneInData = dataKeys.includes(ruleFieldValues[0]);
-            if(!isRuleFieldValueOneInData){
+          const isFirstFieldValueInData = dataKeys.includes(ruleFieldValues[0]);
+          const firstNestFieldName = reqData.data[ruleFieldValues[0]];
+          //first level nesting
+          if(ruleFieldValues.length == 2){
+            if(!isFirstFieldValueInData){
                 return throwErr({
                     message: `field ${ruleFieldValues[0]} is missing from data.`,
                     statusCode: 400
                 })
-            }
-            const subData = reqData.data[ruleFieldValues[0]];
-            //check if subData is an object
-            if(Object.prototype.toString.call(subData) !== '[object Object]'){
+            }           
+            //check if firstNestFieldName contains an object
+            if(Object.prototype.toString.call(firstNestFieldName) !== '[object Object]'){
                 return throwErr({
                     message: `field ${ruleFieldValues[1]} is missing from data.`,
                     statusCode: 400
                 })
             }
-            const subDataKeys = Object.keys(subData);
-            const isRuleFieldValueTwoInData = subDataKeys.includes(ruleFieldValues[1]);
-            if(!isRuleFieldValueTwoInData){
+            //check if first nesting of field value contains the ruleFieldValue[1]
+            const firstNestDataKeys = Object.keys(firstNestFieldName);
+            const isSecondFieldNameInData = firstNestDataKeys.includes(ruleFieldValues[1]);
+            if(!isSecondFieldNameInData){
                 return throwErr({
                     message: `field ${ruleFieldValues[1]} is missing from data.`,
                     statusCode: 400
                 })
             }
-        }
+             //call validationResult fxn and send result 
+             const { result, success } = validationResult({
+                fieldName: ruleFieldValues[1],
+                fieldValue: reqData.data[ruleFieldValues[0]][ruleFieldValues[1]],
+                condition: reqData.rule.condition,
+                conditionValue: reqData.rule.condition_value
+            })
+            //console.log(reqData.data[ruleFieldValue], reqData.rule.condition, reqData.rule.condition_value)
+            if(success){
+                return res.json(result);
+            }
+            return res.status(400).json(result);
+          }
+          
+          //for 2nd level nesting
+          if(ruleFieldValues.length >= 3){
+              //check if first name in the field string is passed in the data
+              if(!isFirstFieldValueInData){
+                return throwErr({
+                    message: `field ${ruleFieldValues[0]} is missing from data.`,
+                    statusCode: 400
+                })
+              }
+              //check if the field passed contains a valid object
+              if(Object.prototype.toString.call(firstNestFieldName) !== '[object Object]'){
+                return throwErr({
+                    message: `field ${ruleFieldValues[1]} is missing from data.`,
+                    statusCode: 400
+                })
+              }
+             //check if first nesting of field value contains the ruleFieldValue[1]
+             const _firstNestDataKeys = Object.keys(firstNestFieldName);
+             const _isSecondFieldNameInData = _firstNestDataKeys.includes(ruleFieldValues[1]);
+             if(!_isSecondFieldNameInData){
+                 return throwErr({
+                     message: `field ${ruleFieldValues[1]} is missing from ${ruleFieldValues[0]}.`,
+                     statusCode: 400
+                 })
+             }
+             const secondNestFieldName = reqData.data[ruleFieldValues[0]][ruleFieldValues[1]];
+             //check if second nest field contains an object
+             if(Object.prototype.toString.call(secondNestFieldName) !== '[object Object]'){
+                return throwErr({
+                    message: `field ${ruleFieldValues[2]} is missing from data.`,
+                    statusCode: 400
+                })
+              }
+              //check if first nesting of field value contains the ruleFieldValue[2]
+              const secondNestDataKeys = Object.keys(secondNestFieldName);
+              const isThirdFieldNameInData = secondNestDataKeys.includes(ruleFieldValues[2]);
+              if(!isThirdFieldNameInData){
+                return throwErr({
+                    message: `field ${ruleFieldValues[2]} is missing from ${ruleFieldValues[1]}.`,
+                    statusCode: 400
+                })
+              }
+              //call validationResult fxn and send result 
+              const { result, success } = validationResult({
+                fieldName: ruleFieldValues[2],
+                fieldValue: reqData.data[ruleFieldValues[0]][ruleFieldValues[1]][ruleFieldValues[2]],
+                condition: reqData.rule.condition,
+                conditionValue: reqData.rule.condition_value
+              })
+              //console.log(reqData.data[ruleFieldValue], reqData.rule.condition, reqData.rule.condition_value)
+              if(success){
+                return res.json(result);
+              }
+              return res.status(400).json(result);          
+           }
+       }
     }
 
+    //for array
+    if(Object.prototype.toString.call(reqData.data) === '[object Array]'){
+        const data = reqData.data;
+        const isFieldInData = data.includes(ruleFieldValue);
+        if(!isFieldInData){
+            throwErr({
+                message: `field ${ruleFieldValue} is missing from data.`,
+                statusCode: 400
+            })
+        }
+        //call validation result and send result
+        const { result, success } = validateArray({
+            fieldName: ruleFieldValue,
+            condition: reqData.rule.condition,
+            conditionValue: reqData.rule.condition_value,
+        })
+        if(success){
+            return res.json(result);
+        }
+        return res.status(400).json(result);
+    }
 }

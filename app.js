@@ -5,7 +5,7 @@ const app = express();
 const ruleValidationRoute = require('./routes/ruleValidation');
 
 //register middlewares
-app.use(express.json());
+//app.use(express.json());
 
 //send data 
 app.use(ruleValidationRoute);
