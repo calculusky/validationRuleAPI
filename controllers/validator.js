@@ -1,9 +1,10 @@
-
+const { validationResult } = require('./validationResult');
 
 
 
 //rule validation function
-exports.validator = (reqData, throwErr) => {
+exports.validator = (req, res, throwErr) => {
+    const reqData = req.body; //get the request data
 
     //string function
     const isString = (string) => {
@@ -58,7 +59,7 @@ exports.validator = (reqData, throwErr) => {
         if(!(reqData.rule[key] === 'eq' 
           || reqData.rule[key] === 'neq'
           || reqData.rule[key] === 'gt'
-          || reqData.rule[key] === 'ngt'
+          || reqData.rule[key] === 'gte'
           || reqData.rule[key] === 'contains'
         )){
             return throwErr({
@@ -120,6 +121,7 @@ exports.validator = (reqData, throwErr) => {
         const dataKeys = Object.keys(reqData.data);
         //for no nesting
         if(ruleFieldValue){
+            console.log(ruleFieldValue)
             const isRuleFieldInData = dataKeys.includes(ruleFieldValue);
             if(!isRuleFieldInData){
                 return throwErr({
@@ -127,10 +129,22 @@ exports.validator = (reqData, throwErr) => {
                     statusCode: 400
                 })
             }
+            //call validationResult fxn and send result 
+            // const { result, success } = validationResult({
+            //     fieldName: ruleFieldValue,
+            //     fieldValue: reqData.data.ruleFieldValue,
+            //     condition: reqData.rule.condition,
+            //     conditionValue: reqData.rule.condition_value
+            // })
+            console.log(reqData.data.ruleFieldValue, reqData.rule.condition, reqData.rule.condition_value)
+            // if(success){
+            //     return res.json(result);
+            // }
+            // return res.status(400).json(result);
         }
         //for nested
         if(ruleFieldValues){
-            console.log(ruleFieldValues)
+            //console.log(ruleFieldValues)
             const isRuleFieldValueOneInData = dataKeys.includes(ruleFieldValues[0]);
             if(!isRuleFieldValueOneInData){
                 return throwErr({
