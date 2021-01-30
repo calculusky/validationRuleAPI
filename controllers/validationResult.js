@@ -75,82 +75,15 @@ exports.validationResult = ({ fieldName, fieldValue, condition, conditionValue }
 
         default:
             //'contains' condition
-            if(fieldValue == conditionValue){
+            if(typeof(fieldValue) === 'number' || typeof(conditionValue) === 'number'){
+                return failureMessage(fieldName, fieldValue, condition, conditionValue, errorMsg);
+            }
+            if(fieldValue.includes(conditionValue)){
                 return successMessage(fieldName, fieldValue, condition, conditionValue, successMsg);
             }         
             return failureMessage(fieldName, fieldValue, condition, conditionValue, errorMsg);
     }
 }
 
-//for array
-const arrSuccessMsg = (fieldName, condition, conditionValue, message) => {
-    const result = {
-        message: message,
-        status: 'success',
-        data: {
-            validation: {
-                error: false,
-                field: fieldName,
-                condition: condition,
-                condition_value: conditionValue
-            }
-        }
-    }
-    return {
-        result: result,
-        success: true
-    }
-}
 
-//fail message
-const arrFailMsg = (fieldName, condition, conditionValue, message) => {
-    const result = {
-        message: message,
-        status: 'error',
-        data: {
-            validation: {
-                error: true,
-                field: fieldName,
-                condition: condition,
-                condition_value: conditionValue
-            }
-        }
-    }
-    return  {
-        result: result,
-        success: false
-    }
-}
-exports.validateArray = ({ fieldName, condition, conditionValue }) => {
-    const successMsg = `field ${fieldName} successfully validated.`;
-    const errorMsg = `field ${fieldName} failed validation.`
-    switch (condition) {
-        case 'eq':
-            if(fieldName == conditionValue){
-                return arrSuccessMsg(fieldName, condition, conditionValue, successMsg)
-            }
-            return arrFailMsg(fieldName, condition, conditionValue, errorMsg)
 
-        case 'neq':
-            if(fieldName != conditionValue){
-                return arrSuccessMsg(fieldName, condition, conditionValue, successMsg)
-            }
-            return arrFailMsg(fieldName, condition, conditionValue, errorMsg);
-
-        case 'gt':
-            if(fieldName > conditionValue){
-                return arrSuccessMsg(fieldName, condition, conditionValue, successMsg)
-            }
-            return arrFailMsg(fieldName, condition, conditionValue, errorMsg);
-
-        case 'gte':
-            if(fieldName !== conditionValue){
-                return arrSuccessMsg(fieldName, condition, conditionValue, successMsg)
-            }
-            return arrFailMsg(fieldName, condition, conditionValue, errorMsg);
-
-        default:
-            return arrFailMsg(fieldName, condition, conditionValue, errorMsg);
-    }   
-    
-}

@@ -17,12 +17,18 @@ exports.myInfo = (req, res, next) => {
     res.json(info)
 }
 
-exports.validateRule = async (req, res, next) => {
-   
-    //const { rule, data } = req.body;
+exports.validateRule = async (req, res, next) => {  
     try {
-        //validate fields and return error message if exists
-        validator(req, res, throwError);
+        const { error, statusCode, result } = validator(req);
+        //validator(req);
+
+        if(error && statusCode){
+            return res.status(statusCode).json(result)
+        }
+        if(error){
+            throwError(result)
+        }
+        res.json(result);
 
     } catch (error) {
         next(error)
